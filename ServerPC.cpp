@@ -53,6 +53,7 @@ int main()
 	int error = 0;
 	char buffer[32] = "Hello world!\n";
 	int menuChoice = 0;
+	int timeConversion;
 	/*Sockets server*/
 	SOCKET sock;
 	SOCKADDR_IN sin;
@@ -96,41 +97,58 @@ int main()
 						switch (menuChoice)
 						{
 						case 0:
-							printf("1: send hello world\n2: send a 1\n3: close connexion\n");
+							printf("1: Start ADC 1\n2: Start ADC 2\n3: Start ADC 3\n4: close connexion\n");
 							cin >> menuChoice;
 							break;
 						case 1:
-							/*Sending a string*/
-							
-								sock_err = send(csock, buffer, 32, 0);
-
-
-								if (sock_err != SOCKET_ERROR)
-								{
-									printf("String sent : %s\n", buffer);
-								}
-								else {
-									printf("Transmition error\n");
-								
-								
+							printf("How long do you want to convert the signal?\n");
+							cin >> timeConversion;
+							buffer[0] = 'a';
+							buffer[1] = timeConversion;
+							sock_err = send(csock, buffer, 32, 0);
+							if (sock_err = SOCKET_ERROR)
+							{
+								printf("error while sending informations\n");
 							}
-							
+
 							menuChoice = 0;
 							break;
 						case 2:
-							sock_err = send(csock, "1", 32, 0);
-							if (sock_err != SOCKET_ERROR)
+							printf("How long do you want to convert the signal?\n");
+							cin >> timeConversion;
+							buffer[0] = 'b';
+							buffer[1] = timeConversion;
+							sock_err = send(csock, buffer, 32, 0);
+							if (sock_err = SOCKET_ERROR)
 							{
-								printf("1 sent\n");
+								printf("error while sending informations\n");
 							}
+
+							menuChoice = 0;
+							break;
+						case 3:
+							printf("How long do you want to convert the signal?\n");
+							cin >> timeConversion;
+							buffer[0] = 'c';
+							buffer[1] = timeConversion;
+							sock_err = send(csock, buffer, 32, 0);
+							if (sock_err = SOCKET_ERROR)
+							{
+								printf("error while sending informations\n");
+							}
+
 							menuChoice = 0;
 							break;
 						default:
+							printf("Wrong choice\n");
 							menuChoice = 0;
 							break;
 						}
-					} while (menuChoice != 3);
+
+					} while (menuChoice != 4);
 					/* shooting down the connexion*/
+					buffer[0] = 'z';
+					sock_err = send(csock, buffer, 32, 0);
 					shutdown(csock, 2);
 				}
 				else
