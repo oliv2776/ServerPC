@@ -1,31 +1,58 @@
-// ServerPC.cpp : définit le point d'entrée pour l'application console.
-//
+/*!
+*\file ServerPC.cpp
+*\brief The app server
+*\author Olivier Deschênes
+*\version 0.1
+*/
 
-
-/*Includes*/
+#if defined (WIN32)
+typedef int socklen_t;
 #include "stdafx.h"
 /*To avoid _WINSOCK_DEPRECATED_NO_WARNINGS error while compiling*/
 #define _WINSOCK_DEPRECATED_NO_WARNINGS
-#include <iostream>
 #include <winsock2.h>
+#include <iostream>
+#include <fstream>
+#pragma comment(lib, "ws2_32.lib")
+using namespace std;
+
+#elif defined (linux)
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <unistd.h>
+#define INVALID_SOCKET -1
+#define SOCKET_ERROR -1
+#define closesocket(s) close(s)
+typedef int SOCKET;
+typedef struct sockaddr_in SOCKADDR_IN;
+typedef struct sockaddr SOCKADDR;
+#endif
+
+
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string>
 
-#pragma comment(lib, "ws2_32.lib")
-/*defines*/
 #define PORT 23
 
 
-typedef int socklen_t;
-using namespace std;
 
 int main()
 {
+	
+#if defined (WIN32)
 	WSADATA WSAData;
-	WSAStartup(MAKEWORD(2, 0), &WSAData);
+	int erreur = WSAStartup(MAKEWORD(2, 2), &WSAData);
+#else
+	int erreur = 0;
+#endif
 
 	int error = 0;
+	char buffer[32] = "Hello world!\n";
+	int menuChoice = 0;
 	/*Sockets server*/
 	SOCKET sock;
 	SOCKADDR_IN sin;
@@ -58,13 +85,53 @@ int main()
 				sock_err = listen(sock, 5);
 				printf("listening port %d\n", PORT);
 
-				/*If the socket wors*/
+				/*If the socket works*/
 				if (sock_err != SOCKET_ERROR) {
 					/*Waiting while client connect*/
 					printf("Wait while the client is connecting on port %d\n", PORT);
 					csock = accept(sock, (SOCKADDR*)&csin, &crecsize);
 					printf("The client connect with the socket %d of %s:%d\n", csock, inet_ntoa(csin.sin_addr), htons(csin.sin_port));
+					do 
+					{
+						switch (menuChoice)
+						{
+						case 0:
+							printf("1: send hello world\n2: send a 1\n3: close connexion\n");
+							cin >> menuChoice;
+							break;
+						case 1:
+							/*Sending a string*/
+							
+								sock_err = send(csock, buffer, 32, 0);
 
+
+								if (sock_err != SOCKET_ERROR)
+								{
+									printf("String sent : %s\n", buffer);
+								}
+								else {
+									printf("Transmition error\n");
+								
+								
+							}
+							
+							menuChoice = 0;
+							break;
+						case 2:
+							sock_err = send(csock, "1", 32, 0);
+							if (sock_err != SOCKET_ERROR)
+							{
+								printf("1 sent\n");
+							}
+							menuChoice = 0;
+							break;
+						default:
+							menuChoice = 0;
+							break;
+						}
+					} while (menuChoice != 3);
+					/* shooting down the connexion*/
+					shutdown(csock, 2);
 				}
 				else
 					perror("listen");
@@ -80,8 +147,13 @@ int main()
 		}
 		else
 			perror("socket");
-		WSACleanup();
+
+		#if defined (WIN32)
+			WSACleanup();
+		#endif
+
 	}
+	getchar();
 
 	
 	return EXIT_SUCCESS;
