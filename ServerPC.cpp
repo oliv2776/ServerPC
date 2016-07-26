@@ -10,6 +10,7 @@ typedef int socklen_t;
 #include "stdafx.h"
 /*To avoid _WINSOCK_DEPRECATED_NO_WARNINGS error while compiling*/
 #define _WINSOCK_DEPRECATED_NO_WARNINGS
+#define _CRT_SECURE_NO_WARNINGS
 #include <winsock2.h>
 #include <iostream>
 #include <fstream>
@@ -38,7 +39,7 @@ typedef struct sockaddr SOCKADDR;
 
 #define PORT 23
 
-
+void convertIntToChar(char ConvertedInt[], int indexTable, int numberToConvert);
 
 int main()
 {
@@ -51,7 +52,8 @@ int main()
 #endif
 
 	int error = 0;
-	char buffer[32] = "Hello world!\n";
+	char buffer[32] = " ";
+	char temp[6];
 	int menuChoice = 0;
 	int timeConversion;
 	/*Sockets server*/
@@ -104,8 +106,12 @@ int main()
 							printf("How long do you want to convert the signal?\n");
 							cin >> timeConversion;
 							buffer[0] = 'a';
-							buffer[1] = timeConversion;
-							sock_err = send(csock, buffer, 32, 0);
+							convertIntToChar(buffer, 1, timeConversion);
+							for (int i = 0; i < 6; i++) {
+								buffer[i+1] = temp[i];
+								printf("%c", buffer[i]);
+							}
+							sock_err = send(csock, buffer, sizeof(buffer), 0);
 							if (sock_err = SOCKET_ERROR)
 							{
 								printf("error while sending informations\n");
@@ -117,7 +123,7 @@ int main()
 							printf("How long do you want to convert the signal?\n");
 							cin >> timeConversion;
 							buffer[0] = 'b';
-							buffer[1] = timeConversion;
+							convertIntToChar(buffer, 1, timeConversion);
 							sock_err = send(csock, buffer, 32, 0);
 							if (sock_err = SOCKET_ERROR)
 							{
@@ -130,7 +136,7 @@ int main()
 							printf("How long do you want to convert the signal?\n");
 							cin >> timeConversion;
 							buffer[0] = 'c';
-							buffer[1] = timeConversion;
+							convertIntToChar(buffer, 1, timeConversion);
 							sock_err = send(csock, buffer, 32, 0);
 							if (sock_err = SOCKET_ERROR)
 							{
@@ -175,4 +181,13 @@ int main()
 
 	
 	return EXIT_SUCCESS;
+}
+
+void convertIntToChar(char ConvertedInt[], int indexTable, int numberToConvert) {
+	int modulo;
+	int multiple;
+	multiple = numberToConvert / 127;
+	modulo = numberToConvert % 127;
+	ConvertedInt[indexTable] = multiple;
+	ConvertedInt[indexTable + 1] = modulo;
 }
