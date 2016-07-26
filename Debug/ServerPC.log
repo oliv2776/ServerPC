@@ -1,5 +1,6 @@
 ﻿  ServerPC.cpp
 c:\users\olivier\documents\visual studio 2015\projects\serverpc\serverpc\serverpc.cpp(13): warning C4005: '_CRT_SECURE_NO_WARNINGS' : redéfinition de macro
   c:\users\olivier\documents\visual studio 2015\projects\serverpc\serverpc\serverpc.cpp(13): note: arguments de ligne de commande : voir la définition précédente de '_CRT_SECURE_NO_WARNINGS'
+c:\users\olivier\documents\visual studio 2015\projects\serverpc\serverpc\serverpc.cpp(62): warning C4101: 'temp' : variable locale non référencée
   ServerPC.vcxproj -> C:\Users\olivier\Documents\Visual Studio 2015\Projects\ServerPC\Debug\ServerPC.exe
   ServerPC.vcxproj -> C:\Users\olivier\Documents\Visual Studio 2015\Projects\ServerPC\Debug\ServerPC.pdb (Full PDB)

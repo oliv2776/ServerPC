@@ -39,8 +39,14 @@ typedef struct sockaddr SOCKADDR;
 
 #define PORT 23
 
-void convertIntToChar(char ConvertedInt[], int indexTable, int numberToConvert);
-
+/**
+* @brief convert a Int into a table of char
+* @param char ConvertedInt[]: the table where the int will be put into
+* @param int indexTable: the index in the table of char where there is the lengh of the number to convert
+* @param uint32_t numberToConvert: the number to convert in the table of char
+* @retval void
+*/
+void convertIntToChar(char ConvertedInt[], int indexTable, uint32_t numberToConvert);
 int main()
 {
 	
@@ -52,7 +58,7 @@ int main()
 #endif
 
 	int error = 0;
-	char buffer[32] = " ";
+	char buffer[32] = "";
 	char temp[6];
 	int menuChoice = 0;
 	int timeConversion;
@@ -107,9 +113,8 @@ int main()
 							cin >> timeConversion;
 							buffer[0] = 'a';
 							convertIntToChar(buffer, 1, timeConversion);
-							for (int i = 0; i < 6; i++) {
-								buffer[i+1] = temp[i];
-								printf("%c", buffer[i]);
+							for (int i = 0; i < sizeof(buffer); i++) {
+								printf("%d", buffer[i]);
 							}
 							sock_err = send(csock, buffer, sizeof(buffer), 0);
 							if (sock_err = SOCKET_ERROR)
@@ -183,11 +188,29 @@ int main()
 	return EXIT_SUCCESS;
 }
 
-void convertIntToChar(char ConvertedInt[], int indexTable, int numberToConvert) {
-	int modulo;
-	int multiple;
-	multiple = numberToConvert / 127;
-	modulo = numberToConvert % 127;
-	ConvertedInt[indexTable] = multiple;
-	ConvertedInt[indexTable + 1] = modulo;
+void convertIntToChar(char ConvertedInt[], int indexTable, uint32_t numberToConvert) {
+	uint32_t modulo;
+	int newIndex = 0;
+	char tempChar[16];
+
+	do {
+		modulo = numberToConvert % 10;
+		tempChar[newIndex] = modulo + 48;
+		newIndex++;
+		numberToConvert /= 10;
+	} while (numberToConvert);
+
+	for (int i = 0; i<newIndex / 2; i++)
+	{
+		int tampon = tempChar[i];
+		tempChar[i] = tempChar[newIndex - 1 - i];
+		tempChar[newIndex - 1 - i] = tampon;
+	}
+
+
+	for (int i = 0; i < newIndex; i++) {
+		ConvertedInt[i + indexTable + 1] = tempChar[i];
+	}
+	ConvertedInt[indexTable] = newIndex + 48;
+
 }
