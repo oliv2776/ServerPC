@@ -1,11 +1,11 @@
 ﻿  ServerPC.cpp
 c:\users\olivier\documents\visual studio 2015\projects\serverpc\serverpc\serverpc.cpp(13): warning C4005: '_CRT_SECURE_NO_WARNINGS' : redéfinition de macro
   c:\users\olivier\documents\visual studio 2015\projects\serverpc\serverpc\serverpc.cpp(13): note: arguments de ligne de commande : voir la définition précédente de '_CRT_SECURE_NO_WARNINGS'
-c:\users\olivier\documents\visual studio 2015\projects\serverpc\serverpc\serverpc.cpp(227): warning C4244: '=' : conversion de 'WORD' en 'uint8_t', perte possible de données
-c:\users\olivier\documents\visual studio 2015\projects\serverpc\serverpc\serverpc.cpp(228): warning C4244: '=' : conversion de 'WORD' en 'uint8_t', perte possible de données
-c:\users\olivier\documents\visual studio 2015\projects\serverpc\serverpc\serverpc.cpp(229): warning C4244: '=' : conversion de 'WORD' en 'uint8_t', perte possible de données
-c:\users\olivier\documents\visual studio 2015\projects\serverpc\serverpc\serverpc.cpp(230): warning C4244: '=' : conversion de 'WORD' en 'uint8_t', perte possible de données
-c:\users\olivier\documents\visual studio 2015\projects\serverpc\serverpc\serverpc.cpp(231): warning C4244: '=' : conversion de 'WORD' en 'uint8_t', perte possible de données
-c:\users\olivier\documents\visual studio 2015\projects\serverpc\serverpc\serverpc.cpp(232): warning C4244: '=' : conversion de 'WORD' en 'uint8_t', perte possible de données
-c:\users\olivier\documents\visual studio 2015\projects\serverpc\serverpc\serverpc.cpp(233): warning C4244: '=' : conversion de 'WORD' en 'uint8_t', perte possible de données
-c:\users\olivier\documents\visual studio 2015\projects\serverpc\serverpc\serverpc.cpp(142): error C4700: variable locale 'frame1' non initialisée utilisée
+c:\users\olivier\documents\visual studio 2015\projects\serverpc\serverpc\serverpc.cpp(248): warning C4244: '=' : conversion de 'WORD' en 'uint8_t', perte possible de données
+c:\users\olivier\documents\visual studio 2015\projects\serverpc\serverpc\serverpc.cpp(249): warning C4244: '=' : conversion de 'WORD' en 'uint8_t', perte possible de données
+c:\users\olivier\documents\visual studio 2015\projects\serverpc\serverpc\serverpc.cpp(251): warning C4244: '=' : conversion de 'WORD' en 'uint8_t', perte possible de données
+c:\users\olivier\documents\visual studio 2015\projects\serverpc\serverpc\serverpc.cpp(252): warning C4244: '=' : conversion de 'WORD' en 'uint8_t', perte possible de données
+c:\users\olivier\documents\visual studio 2015\projects\serverpc\serverpc\serverpc.cpp(253): warning C4244: '=' : conversion de 'WORD' en 'uint8_t', perte possible de données
+c:\users\olivier\documents\visual studio 2015\projects\serverpc\serverpc\serverpc.cpp(254): warning C4244: '=' : conversion de 'WORD' en 'uint8_t', perte possible de données
+  ServerPC.vcxproj -> C:\Users\olivier\Documents\Visual Studio 2015\Projects\ServerPC\Debug\ServerPC.exe
+  ServerPC.vcxproj -> C:\Users\olivier\Documents\Visual Studio 2015\Projects\ServerPC\Debug\ServerPC.pdb (Full PDB)

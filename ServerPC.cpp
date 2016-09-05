@@ -37,10 +37,13 @@ typedef struct sockaddr SOCKADDR;
 #include <stdlib.h>
 #include <string>
 
+#define ADC1 1
+#define ADC2 2
+#define ADC3 3
 #define PORT 23
 #define BUFFERSIZE 32
 #define SIZEDATA 1024
-#define SIZEFRAME 2*SIZEDATA+21
+#define SIZEFRAME 2*SIZEDATA+23
 
 /*Frame sent to the client: Board name, ADC number, Packet number... char[]*/
 typedef union frame_u {
@@ -51,7 +54,7 @@ typedef union frame_u {
 		uint32_t total_of_packet;
 		uint8_t day;
 		uint8_t month;
-		uint8_t year;
+		uint16_t year;
 		uint8_t hour;
 		uint8_t minutes;
 		uint8_t seconds;
@@ -63,7 +66,7 @@ typedef union frame_u {
 }frame_u;
 
 /*Format the frame with the the informations in the structure frame but without the data*/
-void formatbuffer(union frame_u frame,uint8_t boardNumber, uint8_t adcnumber, uint32_t nbPacket, uint32_t numberTotalOfPackets);
+frame_u formatbuffer(uint8_t boardNumber, uint8_t adcnumber, uint32_t nbPacket, uint32_t numberTotalOfPackets);
 
 int main()
 {
@@ -77,9 +80,9 @@ int main()
 
 	frame_u frame1;//frame sent to the client
 	/*fill the frame.frame_as_byte with 0 to avoid error like non initialized variable*/
-	for (int i = 0; i < SIZEFRAME; i++) {
+	/*for (int i = 0; i < SIZEFRAME; i++) {
 		frame1.frame_as_byte[i] = '0';
-	}
+	}*/
 	int error = 0;
 
 	SYSTEMTIME t;
@@ -140,7 +143,7 @@ int main()
 							cin >> total_of_packet;
 							
 							//format the frame before being sent 
-							formatbuffer(frame1, 1, 1, 0, total_of_packet);
+							frame1 = formatbuffer( 1, ADC1, 0, total_of_packet);
 							//verify if the frame is well formated
 							for (int i = 2; i < 21; i++) {
 								printf("%d \t", frame1.frame_as_byte[i]);
@@ -156,31 +159,46 @@ int main()
 
 							menuChoice = 0;
 							break;
-					/*	case 2:
-							printf("How many packets do you want?\n");
-							cin >> total_of_packet;
-							
-							sock_err = send(csock, buffer, BUFFERSIZE, 0);
-							if (sock_err = SOCKET_ERROR)
-							{
-								printf("error while sending informations\n");
-							}
+					case 2:
+						printf("How many packets do you want?\n");
+						cin >> total_of_packet;
 
-							menuChoice = 0;
-							break;
+						//format the frame before being sent 
+						frame1 = formatbuffer(1, ADC2, 0, total_of_packet);
+						//verify if the frame is well formated
+						for (int i = 2; i < 21; i++) {
+							printf("%d \t", frame1.frame_as_byte[i]);
+						}// the frame is not formated WHY?????????
+
+
+						printf("\n");
+						sock_err = send(csock, frame1.frame_as_byte, SIZEFRAME, 0);
+						if (sock_err = SOCKET_ERROR)
+						{
+							printf("error while sending informations, error %d\n", sock_err);
+						}
+
+						menuChoice = 0;
+						break;
 						case 3:
 							printf("How many packets do you want?\n");
 							cin >> total_of_packet;
-							
+
+							//format the frame before being sent 
+							frame1 = formatbuffer(1, ADC3, 0, total_of_packet);
+							//verify if the frame is well formated
+							for (int i = 2; i < 21; i++) {
+								printf("%d \t", frame1.frame_as_byte[i]);
+							}// the frame is not formated WHY?????????
+
+
+							printf("\n");
+							sock_err = send(csock, frame1.frame_as_byte, SIZEFRAME, 0);
 							if (sock_err = SOCKET_ERROR)
 							{
-								printf("error while sending informations\n");
+								printf("error while sending informations, error %d\n", sock_err);
 							}
 
-							menuChoice = 0;
-							break;*/
-						default:
-							printf("Wrong choice\n");
 							menuChoice = 0;
 							break;
 						}
@@ -219,10 +237,10 @@ int main()
 
 
 //DOESN'T FORMAT THE FRAME, WHY?????
-void formatbuffer(union frame_u frame, uint8_t boardNumber, uint8_t adcnumber, uint32_t nbPacket, uint32_t numberTotalOfPackets) {
+frame_u formatbuffer( uint8_t boardNumber, uint8_t adcnumber, uint32_t nbPacket, uint32_t numberTotalOfPackets) {
 	SYSTEMTIME t;
 	GetSystemTime(&t);
-
+	frame_u frame;
 	frame.frame_as_field.board = boardNumber;
 	frame.frame_as_field.adc_number = adcnumber;
 	frame.frame_as_field.packet_number = nbPacket;
@@ -234,4 +252,5 @@ void formatbuffer(union frame_u frame, uint8_t boardNumber, uint8_t adcnumber, u
 	frame.frame_as_field.minutes = t.wMinute;
 	frame.frame_as_field.seconds = t.wSecond;
 	frame.frame_as_field.miliseconds = t.wMilliseconds;
+	return frame;
 }
