@@ -42,8 +42,8 @@ typedef struct sockaddr SOCKADDR;
 #define SIZEDATA 1024
 #define SIZEFRAME 2*SIZEDATA+21
 
-
-union frame_u {
+/*Frame sent to the client: Board name, ADC number, Packet number... char[]*/
+typedef union frame_u {
 	struct frame_s {
 		uint8_t board;
 		uint8_t adc_number;
@@ -60,9 +60,10 @@ union frame_u {
 		uint16_t data[SIZEDATA];
 	}frame_as_field;
 	char frame_as_byte[SIZEFRAME];
-};
+}frame_u;
 
-void formatbuffer(union frame_u frame, uint8_t adcnumber, uint32_t nbPacket, uint32_t numberTotalOfPackets);
+/*Format the frame with the the informations in the structure frame but without the data*/
+void formatbuffer(union frame_u frame,uint8_t boardNumber, uint8_t adcnumber, uint32_t nbPacket, uint32_t numberTotalOfPackets);
 
 int main()
 {
@@ -74,15 +75,19 @@ int main()
 	int erreur = 0;
 #endif
 
-	union frame_u frame1;
-	int error = 0;
-	char buffer[BUFFERSIZE];
-	for (int i = 0; i < BUFFERSIZE; i++) {
-		buffer[i] = '0';
+	frame_u frame1;//frame sent to the client
+	/*fill the frame.frame_as_byte with 0 to avoid error like non initialized variable*/
+	for (int i = 0; i < SIZEFRAME; i++) {
+		frame1.frame_as_byte[i] = '0';
 	}
-	char temp[6];
+	int error = 0;
+
+	SYSTEMTIME t;
+	GetSystemTime(&t);
+
+
 	int menuChoice = 0;
-	uint32_t timeConversion;
+	uint32_t total_of_packet;
 
 	/*Sockets server*/
 	SOCKET sock;
@@ -131,16 +136,17 @@ int main()
 							cin >> menuChoice;
 							break;
 						case 1:
-							printf("How long do you want to convert the signal?\n");
-							cin >> timeConversion;
-							for (int i = 2; i < 30; i++) {
+							printf("How many packets do you want?\n");
+							cin >> total_of_packet;
+							
+							//format the frame before being sent 
+							formatbuffer(frame1, 1, 1, 0, total_of_packet);
+							//verify if the frame is well formated
+							for (int i = 2; i < 21; i++) {
 								printf("%d \t", frame1.frame_as_byte[i]);
-							}
-							frame1.frame_as_field.adc_number = 1;
-							frame1.frame_as_field.total_of_packet = timeConversion;
-							formatbuffer(frame1, 1, 0, timeConversion);
-							
-							
+							}// the frame is not formated WHY?????????
+
+
 							printf("\n");
 							sock_err = send(csock, frame1.frame_as_byte, SIZEFRAME, 0);
 							if (sock_err = SOCKET_ERROR)
@@ -150,9 +156,9 @@ int main()
 
 							menuChoice = 0;
 							break;
-						case 2:
-							printf("How long do you want to convert the signal?\n");
-							cin >> timeConversion;
+					/*	case 2:
+							printf("How many packets do you want?\n");
+							cin >> total_of_packet;
 							
 							sock_err = send(csock, buffer, BUFFERSIZE, 0);
 							if (sock_err = SOCKET_ERROR)
@@ -163,8 +169,8 @@ int main()
 							menuChoice = 0;
 							break;
 						case 3:
-							printf("How long do you want to convert the signal?\n");
-							cin >> timeConversion;
+							printf("How many packets do you want?\n");
+							cin >> total_of_packet;
 							
 							if (sock_err = SOCKET_ERROR)
 							{
@@ -172,7 +178,7 @@ int main()
 							}
 
 							menuChoice = 0;
-							break;
+							break;*/
 						default:
 							printf("Wrong choice\n");
 							menuChoice = 0;
@@ -181,8 +187,8 @@ int main()
 
 					} while (menuChoice != 4);
 					/* shooting down the connexion*/
-					buffer[0] = 'z';
-					sock_err = send(csock, buffer, BUFFERSIZE, 0);
+					//buffer[0] = 'z';
+					//sock_err = send(csock, buffer, BUFFERSIZE, 0);
 					shutdown(csock, 2);
 				}
 				else
@@ -211,11 +217,13 @@ int main()
 	return EXIT_SUCCESS;
 }
 
-void formatbuffer(union frame_u frame, uint8_t adcnumber, uint32_t nbPacket, uint32_t numberTotalOfPackets) {
+
+//DOESN'T FORMAT THE FRAME, WHY?????
+void formatbuffer(union frame_u frame, uint8_t boardNumber, uint8_t adcnumber, uint32_t nbPacket, uint32_t numberTotalOfPackets) {
 	SYSTEMTIME t;
 	GetSystemTime(&t);
 
-	frame.frame_as_field.board = 1;
+	frame.frame_as_field.board = boardNumber;
 	frame.frame_as_field.adc_number = adcnumber;
 	frame.frame_as_field.packet_number = nbPacket;
 	frame.frame_as_field.total_of_packet = numberTotalOfPackets;
@@ -226,7 +234,4 @@ void formatbuffer(union frame_u frame, uint8_t adcnumber, uint32_t nbPacket, uin
 	frame.frame_as_field.minutes = t.wMinute;
 	frame.frame_as_field.seconds = t.wSecond;
 	frame.frame_as_field.miliseconds = t.wMilliseconds;
-
-
-
 }
