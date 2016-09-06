@@ -40,10 +40,14 @@ typedef struct sockaddr SOCKADDR;
 #define ADC1 1
 #define ADC2 2
 #define ADC3 3
+#define ADC1_2 4
+#define ADC1_3 5
+#define ADC2_3 6
+#define ADC1_2_3 7
 #define PORT 23
 #define BUFFERSIZE 32
 #define SIZEDATA 1024
-#define SIZEFRAME 2*SIZEDATA+23
+#define SIZEFRAME 2*SIZEDATA+24
 
 /*Frame sent to the client: Board name, ADC number, Packet number... char[]*/
 typedef union frame_u {
@@ -68,6 +72,8 @@ typedef union frame_u {
 /*Format the frame with the the informations in the structure frame but without the data*/
 frame_u formatbuffer(uint8_t boardNumber, uint8_t adcnumber, uint32_t nbPacket, uint32_t numberTotalOfPackets);
 
+int send_command(int menu_choice, int socket_error,SOCKET csocket);
+
 int main()
 {
 	
@@ -78,11 +84,6 @@ int main()
 	int erreur = 0;
 #endif
 
-	frame_u frame1;//frame sent to the client
-	/*fill the frame.frame_as_byte with 0 to avoid error like non initialized variable*/
-	/*for (int i = 0; i < SIZEFRAME; i++) {
-		frame1.frame_as_byte[i] = '0';
-	}*/
 	int error = 0;
 
 	SYSTEMTIME t;
@@ -90,7 +91,6 @@ int main()
 
 
 	int menuChoice = 0;
-	uint32_t total_of_packet;
 
 	/*Sockets server*/
 	SOCKET sock;
@@ -135,78 +135,48 @@ int main()
 						switch (menuChoice)
 						{
 						case 0:
-							printf("1: Start ADC 1\n2: Start ADC 2\n3: Start ADC 3\n4: close connexion\n");
+							printf("1: Start ADC 1\n2: Start ADC 2\n3: Start ADC 3\n4: Start ADC 1&2\n5: Start ADC 1&3\n6: Start ADC 2&3\n7: Start ADC 1,2&3\n9: Close connexion\n");
 							cin >> menuChoice;
 							break;
-						case 1:
-							printf("How many packets do you want?\n");
-							cin >> total_of_packet;
-							
-							//format the frame before being sent 
-							frame1 = formatbuffer( 1, ADC1, 0, total_of_packet);
-							//verify if the frame is well formated
-							for (int i = 2; i < 21; i++) {
-								printf("%d \t", frame1.frame_as_byte[i]);
-							}// the frame is not formated WHY?????????
 
-
-							printf("\n");
-							sock_err = send(csock, frame1.frame_as_byte, SIZEFRAME, 0);
-							if (sock_err = SOCKET_ERROR)
-							{
-								printf("error while sending informations, error %d\n",sock_err);
-							}
-
-							menuChoice = 0;
+						case ADC1:
+							menuChoice = send_command(menuChoice,sock_err,csock);
 							break;
-					case 2:
-						printf("How many packets do you want?\n");
-						cin >> total_of_packet;
 
-						//format the frame before being sent 
-						frame1 = formatbuffer(1, ADC2, 0, total_of_packet);
-						//verify if the frame is well formated
-						for (int i = 2; i < 21; i++) {
-							printf("%d \t", frame1.frame_as_byte[i]);
-						}// the frame is not formated WHY?????????
-
-
-						printf("\n");
-						sock_err = send(csock, frame1.frame_as_byte, SIZEFRAME, 0);
-						if (sock_err = SOCKET_ERROR)
-						{
-							printf("error while sending informations, error %d\n", sock_err);
-						}
-
-						menuChoice = 0;
+						case ADC2:
+							menuChoice = send_command(menuChoice, sock_err, csock);
 						break;
-						case 3:
-							printf("How many packets do you want?\n");
-							cin >> total_of_packet;
 
-							//format the frame before being sent 
-							frame1 = formatbuffer(1, ADC3, 0, total_of_packet);
-							//verify if the frame is well formated
-							for (int i = 2; i < 21; i++) {
-								printf("%d \t", frame1.frame_as_byte[i]);
-							}// the frame is not formated WHY?????????
+						case ADC3:
+							menuChoice = send_command(menuChoice, sock_err, csock);
+							break;
 
+						case ADC1_2:
+							menuChoice = send_command(menuChoice, sock_err, csock);
+							break;
 
-							printf("\n");
-							sock_err = send(csock, frame1.frame_as_byte, SIZEFRAME, 0);
-							if (sock_err = SOCKET_ERROR)
-							{
-								printf("error while sending informations, error %d\n", sock_err);
-							}
+						case ADC1_3:
+							menuChoice = send_command(menuChoice, sock_err, csock);
+							break;
 
+						case ADC2_3:
+							menuChoice = send_command(menuChoice, sock_err, csock);
+							break;
+
+						case ADC1_2_3:
+							menuChoice = send_command(menuChoice, sock_err, csock);
+							break;
+
+						case 9:
+							menuChoice = send_command(menuChoice, sock_err, csock);
+							break;
+						default:
 							menuChoice = 0;
 							break;
 						}
-
-					} while (menuChoice != 4);
+						
+					} while (menuChoice != 9);
 					/* shooting down the connexion*/
-					//buffer[0] = 'z';
-					//sock_err = send(csock, buffer, BUFFERSIZE, 0);
 					shutdown(csock, 2);
 				}
 				else
@@ -224,23 +194,27 @@ int main()
 		else
 			perror("socket");
 
+		/*Waiting for the user to type something to close*/
+		printf("\nType any key to close, see you soon!\n");
+		getchar();
 		#if defined (WIN32)
 			WSACleanup();
 		#endif
 
 	}
-	getchar();
+
 
 	
 	return EXIT_SUCCESS;
 }
 
 
-//DOESN'T FORMAT THE FRAME, WHY?????
 frame_u formatbuffer( uint8_t boardNumber, uint8_t adcnumber, uint32_t nbPacket, uint32_t numberTotalOfPackets) {
 	SYSTEMTIME t;
 	GetSystemTime(&t);
+
 	frame_u frame;
+
 	frame.frame_as_field.board = boardNumber;
 	frame.frame_as_field.adc_number = adcnumber;
 	frame.frame_as_field.packet_number = nbPacket;
@@ -252,5 +226,32 @@ frame_u formatbuffer( uint8_t boardNumber, uint8_t adcnumber, uint32_t nbPacket,
 	frame.frame_as_field.minutes = t.wMinute;
 	frame.frame_as_field.seconds = t.wSecond;
 	frame.frame_as_field.miliseconds = t.wMilliseconds;
+	frame.frame_as_field.data_lenght = SIZEDATA;
+
 	return frame;
+}
+
+
+int send_command(int menu_choice, int socket_error, SOCKET csocket) {
+	uint32_t total_of_packet;
+	frame_u frame;
+
+	printf("How many packets do you want?\n");
+	cin >> total_of_packet;
+
+	//format the frame before being sent 
+	frame = formatbuffer(1, menu_choice, 0, total_of_packet);
+
+	socket_error = send(csocket, frame.frame_as_byte, SIZEFRAME, 0);
+	if (socket_error = SOCKET_ERROR)
+	{
+		printf("error while sending informations, error %d\n", socket_error);
+	}
+	if (menu_choice == 9) {
+		return 9;
+	}
+	else {
+		return 0;
+	}
+	
 }
