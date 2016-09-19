@@ -14,6 +14,8 @@ typedef int socklen_t;
 #include <winsock2.h>
 #include <iostream>
 #include <fstream>
+#include <inttypes.h>
+
 #pragma comment(lib, "ws2_32.lib")
 using namespace std;
 
@@ -50,7 +52,7 @@ typedef struct sockaddr SOCKADDR;
 #define SIZEFRAME 2*SIZEDATA+24
 
 /*Frame sent to the client: Board name, ADC number, Packet number... char[]*/
-typedef union frame_u {
+union frame_u {
 	struct frame_s {
 		uint8_t board;
 		uint8_t adc_number;
@@ -67,10 +69,25 @@ typedef union frame_u {
 		uint16_t data[SIZEDATA];
 	}frame_as_field;
 	char frame_as_byte[SIZEFRAME];
-}frame_u;
+};
+
+union file_name {
+	struct name {
+		uint8_t board;
+		uint8_t adc;
+		uint8_t day;
+		uint8_t month;
+		uint16_t year;
+		uint8_t hour;
+		uint8_t minutes;
+		uint8_t seconds;
+	}name_as_field;
+	char name_as_byte[9];
+}file_name;
 
 /*Format the frame with the the informations in the structure frame but without the data*/
 frame_u formatbuffer(uint8_t boardNumber, uint8_t adcnumber, uint32_t nbPacket, uint32_t numberTotalOfPackets);
+uint8_t write_data(frame_u frame, uint8_t adc_number);
 
 int send_command(int menu_choice, int socket_error,SOCKET csocket);
 
@@ -89,7 +106,10 @@ int main()
 	SYSTEMTIME t;
 	GetSystemTime(&t);
 
+	char buffer_client[SIZEFRAME];
+	frame_u frame_buffer;
 
+	uint32_t index, current_packet = 0, number_total_of_packets = 1;
 	int menuChoice = 0;
 
 	/*Sockets server*/
@@ -141,6 +161,19 @@ int main()
 
 						case ADC1:
 							menuChoice = send_command(menuChoice,sock_err,csock);
+							do {
+								if (recv(sock, frame_buffer.frame_as_byte, sizeof(frame_buffer.frame_as_byte), 0) != 0) {
+									printf("receiving data!\n");
+									/*for (index = 0; index < SIZEFRAME; index++) {
+										frame_buffer.frame_as_byte[index] = buffer_client[index];
+									}*/
+									number_total_of_packets = frame_buffer.frame_as_field.total_of_packet;
+									current_packet = frame_buffer.frame_as_field.packet_number;
+									printf("\n number %lu, adc number: %lu, time conversion: %lu\n", frame_buffer.frame_as_field.board, frame_buffer.frame_as_field.adc_number, frame_buffer.frame_as_field.data_lenght);
+
+									write_data(frame_buffer,1);
+								}
+							} while (current_packet != number_total_of_packets);
 							break;
 
 						case ADC2:
@@ -176,8 +209,10 @@ int main()
 						}
 						
 					} while (menuChoice != 9);
-					/* shooting down the connexion*/
-					shutdown(csock, 2);
+					
+
+
+
 				}
 				else
 					perror("listen");
@@ -206,6 +241,41 @@ int main()
 
 	
 	return EXIT_SUCCESS;
+}
+
+uint8_t write_data(frame_u frame, uint8_t adc_number) {
+	union file_name file;
+	file.name_as_field.board = frame.frame_as_field.board;
+	file.name_as_field.adc = frame.frame_as_field.adc_number;
+	file.name_as_field.day = frame.frame_as_field.day;
+	file.name_as_field.month = frame.frame_as_field.month;
+	file.name_as_field.year = frame.frame_as_field.year;
+	file.name_as_field.hour = frame.frame_as_field.hour;
+	file.name_as_field.minutes = frame.frame_as_field.minutes;
+	file.name_as_field.seconds = frame.frame_as_field.seconds;
+
+	int n;
+
+	string file_s = file.name_as_byte;
+	char tmp[200];
+	
+	sprintf(tmp,"%06u-%06u-%06u-%06u-%06u.dat",frame.frame_as_field.board,frame.frame_as_field.adc_number,frame.frame_as_field.day,frame.frame_as_field.month,frame.frame_as_field.year);
+	printf("\n%s\n", tmp);
+	/*ofstream current_file("file.txt", ios::app );
+
+	if (current_file)  // if opening file succeded
+	{
+		current_file << frame.frame_as_byte;
+		
+		current_file.close();  // close the file
+	}
+	else  // else printf error
+	{
+		cerr << "\nError while opening file!\n" << endl;
+		return -1;
+	}
+	*/
+	return 0;
 }
 
 
