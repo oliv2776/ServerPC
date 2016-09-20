@@ -71,24 +71,11 @@ union frame_u {
 	char frame_as_byte[SIZEFRAME];
 };
 
-union file_name {
-	struct name {
-		uint8_t board;
-		uint8_t adc;
-		uint8_t day;
-		uint8_t month;
-		uint16_t year;
-		uint8_t hour;
-		uint8_t minutes;
-		uint8_t seconds;
-	}name_as_field;
-	char name_as_byte[9];
-}file_name;
-
 /*Format the frame with the the informations in the structure frame but without the data*/
 frame_u formatbuffer(uint8_t boardNumber, uint8_t adcnumber, uint32_t nbPacket, uint32_t numberTotalOfPackets);
+/*Write the data sent by the client to a file*/
 uint8_t write_data(frame_u frame, uint8_t adc_number);
-
+/*Send a command to the client, the ADC(s), the number of packets*/
 int send_command(int menu_choice, int socket_error,SOCKET csocket);
 
 int main()
@@ -123,6 +110,7 @@ int main()
 	socklen_t crecsize = sizeof(csin);
 
 	int sock_err;
+	int error_rec;
 
 	if (!error) {
 		/*Create the socket*/
@@ -162,42 +150,175 @@ int main()
 						case ADC1:
 							menuChoice = send_command(menuChoice,sock_err,csock);
 							do {
-								if (recv(sock, frame_buffer.frame_as_byte, sizeof(frame_buffer.frame_as_byte), 0) != 0) {
-									printf("receiving data!\n");
-									/*for (index = 0; index < SIZEFRAME; index++) {
-										frame_buffer.frame_as_byte[index] = buffer_client[index];
-									}*/
-									number_total_of_packets = frame_buffer.frame_as_field.total_of_packet;
-									current_packet = frame_buffer.frame_as_field.packet_number;
-									printf("\n number %lu, adc number: %lu, time conversion: %lu\n", frame_buffer.frame_as_field.board, frame_buffer.frame_as_field.adc_number, frame_buffer.frame_as_field.data_lenght);
-
-									write_data(frame_buffer,1);
+								error_rec = recv(csock, frame_buffer.frame_as_byte, sizeof(frame_buffer.frame_as_byte), 0);
+								
+								if (error_rec > 0) {
+									if (error_rec == SIZEFRAME) {
+										printf("receiving data!\n");
+										write_data(frame_buffer, frame_buffer.frame_as_field.adc_number);
+									}
+									else {
+										printf("strange frame recieved %d instead of %d\n", error_rec, SIZEFRAME);
+									}
 								}
-							} while (current_packet != number_total_of_packets);
-							break;
+								if (error_rec == SOCKET_ERROR) {
+									printf("error recieving\n");
+								}
+								if (error_rec == 0) {
+									printf("socket closed\n");
+								}
+							} while (frame_buffer.frame_as_field.packet_number != frame_buffer.frame_as_field.total_of_packet-1);
 
+							break;
 						case ADC2:
 							menuChoice = send_command(menuChoice, sock_err, csock);
+							do {
+								error_rec = recv(csock, frame_buffer.frame_as_byte, sizeof(frame_buffer.frame_as_byte), 0);
+
+								if (error_rec > 0) {
+									if (error_rec == SIZEFRAME) {
+										printf("receiving data!\n");
+										write_data(frame_buffer, frame_buffer.frame_as_field.adc_number);
+									}
+									else {
+										printf("strange frame recieved %d instead of %d\n", error_rec, SIZEFRAME);
+									}
+								}
+								if (error_rec == SOCKET_ERROR) {
+									printf("error recieving\n");
+								}
+								if (error_rec == 0) {
+									printf("socket closed\n");
+								}
+							} while (frame_buffer.frame_as_field.packet_number != frame_buffer.frame_as_field.total_of_packet - 1);
+
 						break;
 
 						case ADC3:
 							menuChoice = send_command(menuChoice, sock_err, csock);
+
+							do {
+								error_rec = recv(csock, frame_buffer.frame_as_byte, sizeof(frame_buffer.frame_as_byte), 0);
+
+								if (error_rec > 0) {
+									if (error_rec == SIZEFRAME) {
+										printf("receiving data!\n");
+										write_data(frame_buffer, frame_buffer.frame_as_field.adc_number);
+									}
+									else {
+										printf("strange frame recieved %d instead of %d\n", error_rec, SIZEFRAME);
+									}
+								}
+								if (error_rec == SOCKET_ERROR) {
+									printf("error receiving\n");
+								}
+								if (error_rec == 0) {
+									printf("socket closed\n");
+								}
+							} while (frame_buffer.frame_as_field.packet_number != frame_buffer.frame_as_field.total_of_packet - 1);
+
+
 							break;
 
 						case ADC1_2:
 							menuChoice = send_command(menuChoice, sock_err, csock);
+
+							do {
+								error_rec = recv(csock, frame_buffer.frame_as_byte, sizeof(frame_buffer.frame_as_byte), 0);
+
+								if (error_rec > 0) {
+									if (error_rec == SIZEFRAME) {
+										printf("receiving data!\n");
+										write_data(frame_buffer, frame_buffer.frame_as_field.adc_number);
+									}
+									else {
+										printf("strange frame recieved %d instead of %d\n", error_rec, SIZEFRAME);
+									}
+								}
+								if (error_rec == SOCKET_ERROR) {
+									printf("error receiving\n");
+								}
+								if (error_rec == 0) {
+									printf("socket closed\n");
+								}
+							} while (frame_buffer.frame_as_field.packet_number != frame_buffer.frame_as_field.total_of_packet - 1);
+
+
 							break;
 
 						case ADC1_3:
 							menuChoice = send_command(menuChoice, sock_err, csock);
+
+							do {
+								error_rec = recv(csock, frame_buffer.frame_as_byte, sizeof(frame_buffer.frame_as_byte), 0);
+
+								if (error_rec > 0) {
+									if (error_rec == SIZEFRAME) {
+										printf("receiving data!\n");
+										write_data(frame_buffer, frame_buffer.frame_as_field.adc_number);
+									}
+									else {
+										printf("strange frame recieved %d instead of %d\n", error_rec, SIZEFRAME);
+									}
+								}
+								if (error_rec == SOCKET_ERROR) {
+									printf("error receiving\n");
+								}
+								if (error_rec == 0) {
+									printf("socket closed\n");
+								}
+							} while (frame_buffer.frame_as_field.packet_number != frame_buffer.frame_as_field.total_of_packet - 1);
+
 							break;
 
 						case ADC2_3:
 							menuChoice = send_command(menuChoice, sock_err, csock);
+
+							do {
+								error_rec = recv(csock, frame_buffer.frame_as_byte, sizeof(frame_buffer.frame_as_byte), 0);
+
+								if (error_rec > 0) {
+									if (error_rec == SIZEFRAME) {
+										printf("receiving data!\n");
+										write_data(frame_buffer, frame_buffer.frame_as_field.adc_number);
+									}
+									else {
+										printf("strange frame recieved %d instead of %d\n", error_rec, SIZEFRAME);
+									}
+								}
+								if (error_rec == SOCKET_ERROR) {
+									printf("error receiving\n");
+								}
+								if (error_rec == 0) {
+									printf("socket closed\n");
+								}
+							} while (frame_buffer.frame_as_field.packet_number != frame_buffer.frame_as_field.total_of_packet - 1);
+
 							break;
 
 						case ADC1_2_3:
 							menuChoice = send_command(menuChoice, sock_err, csock);
+
+							do {
+								error_rec = recv(csock, frame_buffer.frame_as_byte, sizeof(frame_buffer.frame_as_byte), 0);
+
+								if (error_rec > 0) {
+									if (error_rec == SIZEFRAME) {
+										printf("receiving data!\n");
+										write_data(frame_buffer, frame_buffer.frame_as_field.adc_number);
+									}
+									else {
+										printf("strange frame recieved %d instead of %d\n", error_rec, SIZEFRAME);
+									}
+								}
+								if (error_rec == SOCKET_ERROR) {
+									printf("error receiving\n");
+								}
+								if (error_rec == 0) {
+									printf("socket closed\n");
+								}
+							} while (frame_buffer.frame_as_field.packet_number != frame_buffer.frame_as_field.total_of_packet - 1);
+
 							break;
 
 						case 9:
@@ -244,24 +365,10 @@ int main()
 }
 
 uint8_t write_data(frame_u frame, uint8_t adc_number) {
-	union file_name file;
-	file.name_as_field.board = frame.frame_as_field.board;
-	file.name_as_field.adc = frame.frame_as_field.adc_number;
-	file.name_as_field.day = frame.frame_as_field.day;
-	file.name_as_field.month = frame.frame_as_field.month;
-	file.name_as_field.year = frame.frame_as_field.year;
-	file.name_as_field.hour = frame.frame_as_field.hour;
-	file.name_as_field.minutes = frame.frame_as_field.minutes;
-	file.name_as_field.seconds = frame.frame_as_field.seconds;
+	char file[200];
+	sprintf(file,"board%03u-ADC%01u-date%02u-%02u-%04u.dat",frame.frame_as_field.board,frame.frame_as_field.adc_number,frame.frame_as_field.day,frame.frame_as_field.month,frame.frame_as_field.year);
 
-	int n;
-
-	string file_s = file.name_as_byte;
-	char tmp[200];
-	
-	sprintf(tmp,"%03u-%03u-%06u-%06u-%06u.dat",frame.frame_as_field.board,frame.frame_as_field.adc_number,frame.frame_as_field.day,frame.frame_as_field.month,frame.frame_as_field.year);
-	printf("\n%s\n", tmp);
-	ofstream current_file(tmp, ios::app );
+	ofstream current_file(file, ios::app );
 
 	if (current_file)  // if opening file succeded
 	{
@@ -274,6 +381,8 @@ uint8_t write_data(frame_u frame, uint8_t adc_number) {
 		cerr << "\nError while opening file!\n" << endl;
 		return -1;
 	}
+
+	printf("packet number %06u written!\n",frame.frame_as_field.packet_number);
 	
 	return 0;
 }
@@ -313,7 +422,7 @@ int send_command(int menu_choice, int socket_error, SOCKET csocket) {
 	frame = formatbuffer(1, menu_choice, 0, total_of_packet);
 
 	socket_error = send(csocket, frame.frame_as_byte, SIZEFRAME, 0);
-	if (socket_error = SOCKET_ERROR)
+	if (socket_error == SOCKET_ERROR)
 	{
 		printf("error while sending informations, error %d\n", socket_error);
 	}
