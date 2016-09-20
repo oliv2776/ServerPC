@@ -259,9 +259,9 @@ uint8_t write_data(frame_u frame, uint8_t adc_number) {
 	string file_s = file.name_as_byte;
 	char tmp[200];
 	
-	sprintf(tmp,"%06u-%06u-%06u-%06u-%06u.dat",frame.frame_as_field.board,frame.frame_as_field.adc_number,frame.frame_as_field.day,frame.frame_as_field.month,frame.frame_as_field.year);
+	sprintf(tmp,"%03u-%03u-%06u-%06u-%06u.dat",frame.frame_as_field.board,frame.frame_as_field.adc_number,frame.frame_as_field.day,frame.frame_as_field.month,frame.frame_as_field.year);
 	printf("\n%s\n", tmp);
-	/*ofstream current_file("file.txt", ios::app );
+	ofstream current_file(tmp, ios::app );
 
 	if (current_file)  // if opening file succeded
 	{
@@ -274,7 +274,7 @@ uint8_t write_data(frame_u frame, uint8_t adc_number) {
 		cerr << "\nError while opening file!\n" << endl;
 		return -1;
 	}
-	*/
+	
 	return 0;
 }
 
